@@ -8,6 +8,8 @@ import webbrowser
 import spotipy.util as util
 from time import sleep
 import webbrowser
+from Song import Song
+from playlist import Playlist
 
 #extra usernames and passwords:
 
@@ -43,29 +45,32 @@ def auth(user):
         #os.remove(f,".cache-{user}")
         sys.exit(0)
 
-def getTracks(token):
+def getTracks(token, username):
     "Function returns list containing song library"
-
     sp = spotipy.Spotify(auth=token)#create Spotify object
     songs = []
+    playlist = Playlist(username, [])
     offset = 0 #this variable determines index in song library at which to begin song fetch
-
     #begin fetching songs from library
     results = sp.current_user_saved_tracks(20,offset)
     while( not (results['items'] == []) ): #while there are still songs left in library
         for item in results['items']:
             track= item['track']
             songs.append(track)
-
         #increase offset to fetch next batch of songs, then fetch
         offset+=20
         results = sp.current_user_saved_tracks(20,offset)
-    return songs
-
-def printTracks(songs):
-    "Function prints the tracks in a list"
     for song in songs:
-        print(song['name']+ ' - ' + song['artists'][0]['name'])
+        artists = []
+        for artist in song['artists']:
+            artists.append(artist['name'])
+        track = Song(song['name'],artists)
+        playlist.add(track)
+    return playlist
+
+def printTracks(playlist):
+    "Function prints the tracks in a playlist"
+    print(str(playlist))
         #if you get a utf error insert .encode("utf-8") like so:
         #print(song['name']+ ' - ' + song['artists'][0]['name']).encode("utf-8")
 
@@ -77,13 +82,11 @@ def get_playlist_tracks(username,playlist_id):
         tracks.extend(results['items'])
     return tracks
 
-def printCommonTracks(user_one_song_list, user_two_song_list):
-    "Function prints tracks that are in common between two users"
+
+def printCommonTracks(playlist1, playlist2):
+    commonSongs = playlist1.compare(playlist2)[0]
     print("\n\n\n\nNow printing common songs...\n\n*************--------------------*************")
-    for user_one_track in user_one_song_list:
-         for user_two_track in user_two_song_list:
-             if ((user_one_track['name']+ ' - ' + user_one_track['artists'][0]['name']).encode("utf-8")== (user_two_track['name']+ ' - ' + user_two_track['artists'][0]['name']).encode("utf-8")):
-                 print((user_one_track['name']+ ' - ' + user_one_track['artists'][0]['name']).encode("utf-8")+ " ******** "+ (user_two_track['name']+ ' - ' + user_two_track['artists'][0]['name']).encode("utf-8"))
+    print(str(commonSongs))
 
 def logoutUser():
     "Function logs out a user"
@@ -96,13 +99,10 @@ def logoutUser():
 webbrowser.open("http://www.spotify.com/logout")
 wait(5)
 
-songs1 = []
-songs2 = []
 
-username1 = sys.argv[1]
+username1 =sys.argv[1]
 token1 = auth(username1)
-songs1 = getTracks(token1)
-#printTracks(songs1)
+songs1 = getTracks(token1, username1)
 #must run this code to remove cache for bellas computer:
 #wait(5)
 #os.remove("C:\Users\isabe\Documents\Networks\SpotifyMatch\.cache-brownbearhoopla")
@@ -111,8 +111,7 @@ logoutUser()
 
 username2 = sys.argv[2]
 token2 = auth(username2)
-songs2 = getTracks(token2)
-#printTracks(songs2)
+songs2 = getTracks(token2, username2)
 #must run this code to remove cache for bellas computer:
 #wait(5)
 #os.remove("C:\Users\isabe\Documents\Networks\SpotifyMatch\.cache-wvvk3mob8c4qncj1wb6jxmv6m")
