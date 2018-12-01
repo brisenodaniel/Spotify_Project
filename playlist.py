@@ -50,14 +50,13 @@ class Playlist:
         for song in self.songs:
             if song in other.songs:
                 sharedSongs.add(song)
-            else:
-                for track in other.songs:
-                    if song.artists == track.artists:
-                        if not (track in artistPairs):
-                            for artist in song.artists:
-                                sharedArtists.add(artist)
-                            artistPairs.append(track)
-                            artistsCount+=1
+            for track in other.songs:
+                if song.artists == track.artists:
+                    if not (track in artistPairs):
+                        for artist in song.artists:
+                            sharedArtists.add(artist)
+                        artistPairs.append(track)
+                        artistsCount+=1
         return (sharedSongs, sharedArtists, artistsCount)
     
 
