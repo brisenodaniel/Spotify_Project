@@ -1,4 +1,5 @@
 class Song:
+    #class constructor
     def __init__(self, title, musicians):
         self.title = title
         self.artists = []
@@ -15,8 +16,8 @@ class Song:
     def __neq__(self,other):
          return not (self==other) 
     
-    #toString method
+    #str() method
     def __str__(self):
-        return self.title+" by: " +", ".join(self.artists)
+        return self.title+" -- by: " +", ".join(self.artists)
 
             

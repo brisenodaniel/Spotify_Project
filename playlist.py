@@ -5,13 +5,11 @@ class Playlist:
         songs = List of songs in playlist -- dec in function __init__
      """
     #class constructor
-    def __init__(self, userId, songs =[]):
+    def __init__(self, userId = "none", songs = []):
         self.userId = userId 
         self.songs = songs
-
-    def add (self, song):
-        self.songs.append(song)
     
+    #str() method
     def __str__(self):
         string = ""
         for song in self.songs:
@@ -25,8 +23,13 @@ class Playlist:
                 return False
         return True
     
+    # != oveload
     def __neq__(self,other):
         return not (self == other)
+
+    #adds parameter to playlist
+    def add (self, song):
+        self.songs.append(song)
 
     #returns true if parameter in playlist, false otherwise
     def has(self, song):
@@ -35,8 +38,10 @@ class Playlist:
         return False 
     
     #Param: other playlist to compare
-    #Returns: sharedSongs {list of song objects present in both playlists} ; sharedArtists {set of artists shared by both profiles}
-    #         artistCount {number of songs with matching artists}
+    #Returns: tuple (sharedSongs, sharedArtists, artistsCount) where
+    #   sharedSongs = playlist object containing songs in common
+    #   sharedArtists = set of all artists who have at least one song in both playlists
+    #   artistsCount = number pairs of songs (one song from each playlist) with the same artist
     def compare(self, other):
         sharedSongs = Playlist("none",[])
         sharedArtists = set()
