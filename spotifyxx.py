@@ -8,7 +8,7 @@ import webbrowser
 import spotipy.util as util
 from time import sleep
 import webbrowser
-from Song import Song
+from song import Song
 from playlist import Playlist
 
 #extra usernames and passwords:
