@@ -80,6 +80,7 @@ def makePlaylist(token, username):
 
 def printCommonTracks(playlist1, playlist2):
     "Function prints tracks that are in common between two users"
+    print("\n\n\n\nNow printing common songs...\n\n**************--------------------*************")
     commonSongs = playlist1.compare(playlist2)[0]
     print("\n\n\n\nNow printing common songs...\n\n*************--------------------*************")
     try:

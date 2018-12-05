@@ -8,8 +8,6 @@ import webbrowser
 import spotipy.util as util
 from time import sleep
 import webbrowser
-from song import Song
-from playlist import Playlist
 
 #extra usernames and passwords:
 
@@ -52,13 +50,13 @@ def auth(user):
         deleteCache()
         sys.exit(0)
 
-def makePlaylist(token, username):
+def getTracks(token):
     "Function returns list containing song library"
 
     sp = spotipy.Spotify(auth=token) #create Spotify object
     songs = []
     offset = 0 #this variable determines index in song library at which to begin song fetch
-    playlist = Playlist(username, [])
+
     #begin fetching songs from library
     results = sp.current_user_saved_tracks(20,offset)
     while( not (results['items'] == []) ): #while there are still songs left in library
@@ -69,23 +67,39 @@ def makePlaylist(token, username):
         #increase offset to fetch next batch of songs, then fetch
         offset+=20
         results = sp.current_user_saved_tracks(20,offset)
-    #create playlist object from json string of songs
-    for song in songs:
-        artists = []
-        for artist in song['artists']:
-            artists.append(artist['name'])
-        track = Song(song['name'],artists)
-        playlist.add(track)
-    return playlist
+    return songs
 
-def printCommonTracks(playlist1, playlist2):
+def printTracks(songs):
+    "Function prints the tracks in a list"
+    print("\n\n\n\nNow printing your songs...\n\n*************--------------------*************")
+    for song in songs:
+        try:
+            print(song['name']+ ' - ' + song['artists'][0]['name'])
+        except:
+            #this will run if utf error occurs
+            print(song['name']+ ' - ' + song['artists'][0]['name']).encode("utf-8")
+
+# def get_playlist_tracks(username,playlist_id):
+#     results = sp.user_playlist_tracks(username,playlist_id)
+#     tracks = results['items']
+#     while results['next']:
+#         results = sp.next(results)
+#         tracks.extend(results['items'])
+#     return tracks
+
+def printCommonTracks(user_one_song_list, user_two_song_list):
     "Function prints tracks that are in common between two users"
-    commonSongs = playlist1.compare(playlist2)[0]
-    print("\n\n\n\nNow printing common songs...\n\n*************--------------------*************")
-    try:
-        print(commonSongs)
-    except:
-        print(str(commonSongs).encode())
+
+    print("\n\n\n\nNow printing common songs...\n\n**************--------------------*************")
+    for user_one_track in user_one_song_list:
+         for user_two_track in user_two_song_list:
+             try:
+                 if ((user_one_track['name']+ ' - ' + user_one_track['artists'][0]['name'])== (user_two_track['name']+ ' - ' + user_two_track['artists'][0]['name'])):
+                     print((user_one_track['name']+ ' - ' + user_one_track['artists'][0]['name'])+ " ******** "+ (user_two_track['name']+ ' - ' + user_two_track['artists'][0]['name']))
+             except:
+                 #this will run if utf error occurs
+                 if ((user_one_track['name']+ ' - ' + user_one_track['artists'][0]['name']).encode("utf-8")== (user_two_track['name']+ ' - ' + user_two_track['artists'][0]['name']).encode("utf-8")):
+                     print((user_one_track['name']+ ' - ' + user_one_track['artists'][0]['name']).encode("utf-8")+ " ******** "+ (user_two_track['name']+ ' - ' + user_two_track['artists'][0]['name']).encode("utf-8"))
 
 def logoutUser():
     "Function logs out a user"
@@ -95,16 +109,6 @@ def logoutUser():
     webbrowser.open("http://www.spotify.com/logout")
     wait(10)
 
-
-###########----Main----############
-
-#Check for valid amount of command line arugments
-if len(sys.argv) < 2:
-    print("You must provide 2 Spotify Usernames as command-line arguments")
-    print("Now exiting program")
-    sys.exit()
-
-
 #when program starts logout any users, allow time for page to load
 webbrowser.open("http://www.spotify.com/logout")
 wait(5)
@@ -113,24 +117,29 @@ songs1 = []
 songs2 = []
 username1 = ""
 username2 = ""
-
-username1 = sys.argv[1]
+if len(sys.argv) > 1:
+    username1 = sys.argv[1]
+else:
+    print("\nError you did not enter a first username. Make sure to use two usernames when you run our code.")
+    sys.exit(0)
 token1 = auth(username1)
-songs1 = makePlaylist(token1, username1)
-print("########### Songs in Playlist 1 ##############")
-print(songs1)
+songs1 = getTracks(token1)
+printTracks(songs1)
 wait(5)
 logoutUser()
 
-
-username2 = sys.argv[2]
+if len(sys.argv) > 2:
+    username1 = sys.argv[2]
+else:
+    print("\nError you did not enter a second username. Make sure to use two usernames when you run our code.")
+    sys.exit(0)
 token2 = auth(username2)
-songs2 = makePlaylist(token2, username2)
-print("########### Songs in Playlist 2 ##############")
-print(songs2)
+songs2 = getTracks(token2)
+printTracks(songs2)
 wait(5)
 logoutUser()
 
 
 printCommonTracks(songs1, songs2)
 print("******************************** --------------------  ********************************")
+print
